@@ -2,10 +2,6 @@
 #include "usart.h"
 #include "stdio.h"
 
-#if SYSTEM_SUPPORT_OS
-#include "includes.h" //ucos สนำร
-#endif
-
 #pragma import(__use_no_semihosting)
 
 char UART_read(void)

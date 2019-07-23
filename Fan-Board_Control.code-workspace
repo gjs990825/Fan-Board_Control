@@ -1,7 +1,14 @@
 {
 	"folders": [
-		{
-			"path": "."
-		}
-	]
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "stdio.h": "c",
+            "usart.h": "c",
+            "motor.h": "c"
+        }
+    }
 }
