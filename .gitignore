@@ -33,6 +33,15 @@ DebugConfig/
 *.uvoptx
 *.lst
 
+#Gao added
+*.crf
+JLinkLog.txt
+*.htm
+OUTPUT/
+USER/Listings
+*.code-workspace
+*.scvd
+
 #SW4STM32
 .metadata/
 RemoteSystemsTempFiles/

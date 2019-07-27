@@ -1,6 +1,12 @@
 --cpu Cortex-M3
 ".\objects\main.o"
 ".\objects\led.o"
+".\objects\motor.o"
+".\objects\mpu6050.o"
+".\objects\iic.o"
+".\objects\timer.o"
+".\objects\my_lib.o"
+".\objects\pid.o"
 ".\objects\delay.o"
 ".\objects\stm32f10x_it.o"
 ".\objects\sys.o"

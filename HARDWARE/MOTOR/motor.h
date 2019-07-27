@@ -4,17 +4,14 @@
 #include "sys.h"
 #include "usart.h"
 
-#define ML_1 PBout(14)
-#define ML_2 PAout(12)
-#define MR_1 PBout(15)
-#define MR_2 PBout(4)
+#define MAX_SPEED 600
+#define MIN_SPEED 150
 
+#define Set_LMotor(val) TIM_SetCompare4(TIM1, val)
+#define Set_RMotor(val) TIM_SetCompare1(TIM1, val)
 
 void TIM1_PWMInit(uint16_t arr, uint16_t psc);
-
-void Motor_Init(void);
-void Motor_SpeedControl(int16_t speed_l, int16_t speed_r);
-void Motor_Right(uint8_t dir);
-void Motor_Left(uint8_t dir);
+void Motor_SpeedControl(int16_t speed);
+void Motor_ShutDown(void);
 
 #endif

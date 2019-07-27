@@ -1,28 +1,7 @@
 #include "motor.h"
+#include "my_lib.h"
 
-void Motor_Init(void)
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
-
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_4 | GPIO_Pin_14;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-	MR_1 = 1;
-	MR_2 = 0;
-	ML_1 = 1;
-	ML_2 = 0;
-}
-
-//µç»úPWMÊä³öÅäÖÃ£¬TIM1
+//ç”µæœºPWMè¾“å‡ºé…ç½®ï¼ŒTIM1
 void TIM1_PWMInit(uint16_t arr, uint16_t psc)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
@@ -47,6 +26,7 @@ void TIM1_PWMInit(uint16_t arr, uint16_t psc)
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_Low;
 	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC4Init(TIM1, &TIM_OCInitStructure);
 
@@ -55,7 +35,46 @@ void TIM1_PWMInit(uint16_t arr, uint16_t psc)
 
 	TIM_Cmd(TIM1, ENABLE);
 
+	Set_RMotor(0);
+	Set_LMotor(0);
+
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
+}
+
+void Motor_SpeedControl(int16_t speed)
+{
+	speed = constrain_int(speed, -MAX_SPEED, MAX_SPEED);
+
+	Set_LMotor(constrain_int(MIN_SPEED + speed, 0, MAX_SPEED));
+	Set_RMotor(constrain_int(MIN_SPEED - speed, 0, MAX_SPEED));
+
+	// if (speed >= 0)
+	// {
+	// 	Set_LMotor(constrain_int(MIN_SPEED + speed, 0, MAX_SPEED));
+	// 	Set_RMotor(constrain_int(MIN_SPEED - speed, 0, MAX_SPEED));
+	// }
+	// else
+	// {
+	// 	Set_LMotor(constrain_int(MIN_SPEED - speed, 0, MAX_SPEED));
+	// 	Set_RMotor(constrain_int(MIN_SPEED + speed, 0, MAX_SPEED));
+	// }
+
+	// if (speed >= 0)
+	// {
+	// 	Set_RMotor(TIM1, constrain_int(MAX_SPEED - speed, 0, 200));
+	// 	Set_LMotor(TIM1, speed);
+	// }
+	// else
+	// {
+	// 	Set_RMotor(TIM1, (uint16_t)(-speed));
+	// 	Set_LMotor(TIM1, constrain_int(MAX_SPEED + speed, 0, 200));
+	// }
+}
+
+void Motor_ShutDown(void)
+{
+	Set_RMotor(0);
+	Set_LMotor(0);
 }
 
 void TIM1_IRQHandler(void)

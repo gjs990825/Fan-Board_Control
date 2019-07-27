@@ -8,7 +8,15 @@
         "files.associations": {
             "stdio.h": "c",
             "usart.h": "c",
-            "motor.h": "c"
+            "motor.h": "c",
+            "sys.h": "c",
+            "stdbool.h": "c",
+            "my_lib.h": "c",
+            "iic.h": "c",
+            "mpu6050.h": "c",
+            "led.h": "c",
+            "timer.h": "c",
+            "pid.h": "c"
         }
     }
 }

@@ -8,8 +8,12 @@ extern "C" {
 #endif
 
 #define LED0 PCout(13)
-//#define LED1 PBout(12)
-//#define LED2 PBout(13)
+#define LED1 PBout(3)
+#define LED2 PBout(5)
+
+#define BEEP PBout(5)
+
+void LightAndBeep(uint16_t t);
 
 void LED_Init(void);
 void LED_Blink(uint8_t LEDn);
