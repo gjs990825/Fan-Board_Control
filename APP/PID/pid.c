@@ -4,8 +4,8 @@
 #include "stdio.h"
 
 // float Kp = 18, Ki = 0.21, Kd = 75;
-// 重物 // 25.0, 0.50, 255.0
-// 无重物 // 25.0, 0.30, 205.0
+// 重物 // 25.0, 0.25, 365.0
+// 无重物 // 25.0, 0.05, 165.0
 
 float Kp = 25.0, Ki = 0.50, Kd = 175.0;
 
@@ -69,10 +69,10 @@ float Calculate_PID(float inputError)
     I = I + error;
     D = error - previous_error;
 
-    I = constrain_float(I, -100.0, 100.0); // 积分限幅
+    I = constrain_float(I, -200.0, 200.0); // 积分限幅
 
     PID_Value = (Kp * P) + (Ki * I) + (Kd * D);
-    PID_Value = constrain_float(PID_Value, -500, 500);
+    PID_Value = constrain_float(PID_Value, -700, 700);
 
     previous_error = error;
 

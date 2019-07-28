@@ -33,16 +33,30 @@ void Turn_To(int target)
     LightAndBeep(5);
 }
 
+// 平稳停泊
+void Landing(void)
+{
+    Control_SetTargetAngle(145);
+    Control_SetStatus(Status_Run);
+
+    delay_ms(500);
+
+    WaitForFlagInMs(Is_Stablilized(), true, 2000);
+
+    LightAndBeep(5);
+}
+
 // 在两个角度之间摆动
 void Swing_Between(int a, int b, uint8_t times)
 {
+    #define cretical 6
     for (uint8_t i = 0; i < times; i++)
     {
         Control_SetTargetAngle(b);
-        while (abs(Get_AngleAverageError()) > 1)
+        while (abs(Get_AngleAverageError()) > cretical)
             ;
         Control_SetTargetAngle(a);
-        while (abs(Get_AngleAverageError()) > 1)
+        while (abs(Get_AngleAverageError()) > cretical)
             ;
     }
     Control_SetTargetAngle(a);
@@ -64,12 +78,33 @@ void Key_Handle(uint8_t key)
 
         if (setAngle1 > setAngle2)
         {
-            setAngle2 = setAngle1 = (setAngle1 + setAngle2) / 2;
+            setAngle1 = setAngle2;
+            // setAngle2 = setAngle1 = (setAngle1 + setAngle2) / 2;
         }
 
         key = GUI_ConfirmPage();
         mission1Start = (key == 5) ? true : false;
-        printf("start?:%d\r\n", mission1Start);
+        printf("Start?:%d\r\n", mission1Start);
+    }
+    // 无重物模式
+    else if (key == 1)
+    {
+        key = GUI_ConfirmPage();
+        if (key == 5)
+        {
+            PID_SetParam(25.0, 0.05, 165.0);
+            printf("Heavy Mode\r\n");
+        }
+    }
+    // 重物模式
+    else if (key == 4)
+    {
+        key = GUI_ConfirmPage();
+        if (key == 5)
+        {
+            PID_SetParam(25.0, 0.25, 365.0);
+            printf("Lite Mode\r\n");
+        }
     }
 }
 
@@ -101,13 +136,8 @@ int main(void)
     Control_SetTargetAngle(35.0);
     Control_SetStatus(Status_Stop);
 
-    // while (1)
-    // {
-    //     Control_SetStatus(Status_Run);
-    //     Swing_Between(60, 110, 2);
-    //     while (1)
-    //         ;
-    // }
+    Control_SetTargetAngle(110.0);
+    Control_SetStatus(Status_Run);
 
     while (1)
     {
@@ -138,39 +168,18 @@ int main(void)
         {
             mission1Start = false;
 
-            Control_SetStatus(Status_Run);
-
             Turn_To(setAngle1);
+            delay(2000);
             Turn_To(setAngle2);
 
             Swing_Between(setAngle2, setAngle1, 3);
 
-            Turn_To(145);
+            // Turn_To(145);
+            Landing();
 
             Control_SetStatus(Status_Stop);
         }
     }
-
-    // while (1)
-    // {
-    //     printf("Average:%f\tVariance:%f\tSTA:%d\r\n", Get_AngleAverageError(), Get_AngleVariance(), Is_Stablilized());
-
-    //     Turn_To(60);
-    //     LightAndBeep(10);
-    //     delay_ms(1000);
-    //     Turn_To(120);
-    //     LightAndBeep(10);
-    //     delay_ms(1000);
-
-    //     printf("CurrentAngle:%f\tPID_OUT:%f\tAverage:%f\tVariance:%f\tSTA:%d\r\n",
-    //            Get_CurrentAngle(),
-    //            PID_Value,
-    //            Get_AngleAverageError(),
-    //            Get_AngleVariance(),
-    //            Is_Stablilized());
-
-    //     delay_ms(100);
-    // }
 }
 
 void assert_failed(uint8_t *file, uint32_t line)
