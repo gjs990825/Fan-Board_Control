@@ -25,8 +25,11 @@ void TIM1_PWMInit(uint16_t arr, uint16_t psc)
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Disable;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_Low;
+	TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Reset;
+	TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
 	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC4Init(TIM1, &TIM_OCInitStructure);
 
@@ -47,40 +50,10 @@ void Motor_SpeedControl(int16_t speed)
 
 	Set_LMotor(constrain_int(MIN_SPEED + speed, 0, MAX_SPEED));
 	Set_RMotor(constrain_int(MIN_SPEED - speed, 0, MAX_SPEED));
-
-	// if (speed >= 0)
-	// {
-	// 	Set_LMotor(constrain_int(MIN_SPEED + speed, 0, MAX_SPEED));
-	// 	Set_RMotor(constrain_int(MIN_SPEED - speed, 0, MAX_SPEED));
-	// }
-	// else
-	// {
-	// 	Set_LMotor(constrain_int(MIN_SPEED - speed, 0, MAX_SPEED));
-	// 	Set_RMotor(constrain_int(MIN_SPEED + speed, 0, MAX_SPEED));
-	// }
-
-	// if (speed >= 0)
-	// {
-	// 	Set_RMotor(TIM1, constrain_int(MAX_SPEED - speed, 0, 200));
-	// 	Set_LMotor(TIM1, speed);
-	// }
-	// else
-	// {
-	// 	Set_RMotor(TIM1, (uint16_t)(-speed));
-	// 	Set_LMotor(TIM1, constrain_int(MAX_SPEED + speed, 0, 200));
-	// }
 }
 
 void Motor_ShutDown(void)
 {
 	Set_RMotor(0);
 	Set_LMotor(0);
-}
-
-void TIM1_IRQHandler(void)
-{
-	if (TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET)
-	{
-		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
-	}
 }

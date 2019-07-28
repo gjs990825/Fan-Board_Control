@@ -7,13 +7,12 @@
 // 重物 // 25.0, 0.50, 255.0
 // 无重物 // 25.0, 0.30, 205.0
 
-float Kp = 28, Ki = 0.0, Kd = 175.0;
+float Kp = 25.0, Ki = 0.50, Kd = 175.0;
 
-float error = 0, P = 0, I = 0, D = 0, PID_value = 0;
+float error = 0, P = 0, I = 0, D = 0, PID_Value = 0;
 float previous_error = 0;
 
-
-
+// 通过串口接收PID参数设置
 void Set_PIDParamFromUSART(void)
 {
     if (USART_RECEIVED)
@@ -35,32 +34,35 @@ void Set_PIDParamFromUSART(void)
     }
 }
 
-
-void PidData_Clear(void)
+// 清除PID数据
+void PID_DataClear(void)
 {
     I = 0;
     D = 0;
-    PID_value = 0;
+    PID_Value = 0;
     previous_error = 0;
 }
 
+// 设置PID参数
 void PID_SetParam(float p, float i, float d)
 {
     Kp = p;
     Ki = i;
     Kd = d;
-    PidData_Clear();
+    PID_DataClear();
 }
 
-void PidData_Set(float error, float value)
+// 设置PID数据
+void PID_DataSetting(float error, float value)
 {
     I = 0;
     D = 0;
-    PID_value = value;
+    PID_Value = value;
     previous_error = error;
 }
 
-void Calculate_pid(float inputError)
+// 根据输入误差计算PID值并输出
+float Calculate_PID(float inputError)
 {
     error = inputError;
     P = error;
@@ -69,8 +71,10 @@ void Calculate_pid(float inputError)
 
     I = constrain_float(I, -100.0, 100.0); // 积分限幅
 
-    PID_value = (Kp * P) + (Ki * I) + (Kd * D);
-    PID_value = constrain_float(PID_value, -500, 500);
+    PID_Value = (Kp * P) + (Ki * I) + (Kd * D);
+    PID_Value = constrain_float(PID_Value, -500, 500);
 
     previous_error = error;
+
+    return PID_Value;
 }

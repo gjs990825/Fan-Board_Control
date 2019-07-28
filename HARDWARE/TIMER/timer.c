@@ -4,6 +4,7 @@
 #include "motor.h"
 #include "my_lib.h"
 #include <stdlib.h>
+#include "gui.h"
 
 // 毫秒时间戳
 volatile uint32_t global_times = 0;
@@ -60,6 +61,12 @@ double Get_CurrentAngle(void)
 	return currentAngle;
 }
 
+// 获取目标角度
+float Get_TargetAngle(void)
+{
+	return targetAngle;
+}
+
 void TIM3_TimerInit(uint16_t arr, uint16_t psc)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
@@ -77,15 +84,40 @@ void TIM3_TimerInit(uint16_t arr, uint16_t psc)
 
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
 	TIM_Cmd(TIM3, ENABLE);
 }
 
-void TIM2_Init(uint16_t arr, uint16_t psc)
+void TIM4_TimerInit(uint16_t arr, uint16_t psc)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+
+	TIM_TimeBaseStructure.TIM_Period = arr;
+	TIM_TimeBaseStructure.TIM_Prescaler = psc;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+
+	TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+
+	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	TIM_Cmd(TIM4, ENABLE);
+}
+
+void TIM2_TimerInit(uint16_t arr, uint16_t psc)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
 	NVIC_InitTypeDef NVIC_InitSturcture;
@@ -103,24 +135,16 @@ void TIM2_Init(uint16_t arr, uint16_t psc)
 
 	NVIC_InitSturcture.NVIC_IRQChannel = TIM2_IRQn;
 	NVIC_InitSturcture.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_InitSturcture.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitSturcture.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitSturcture.NVIC_IRQChannelSubPriority = 2;
 	NVIC_Init(&NVIC_InitSturcture);
 
 	TIM_Cmd(TIM2, ENABLE);
 }
 
-void TIM2_IRQHandler(void)
-{
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
-	{
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-
-		global_times++;
-	}
-}
-
+// 采样周期
 #define cycleTimes 2
+// 采样数组长度
 #define maxArrayNum 10
 
 // 记录数据
@@ -159,8 +183,7 @@ void TIM3_IRQHandler(void)
 		{
 		case Status_Run:
 
-			Calculate_pid(targetAngle - currentAngle);
-			Motor_SpeedControl(PID_value);
+			Motor_SpeedControl(Calculate_PID(targetAngle - currentAngle));
 
 			break;
 
@@ -171,4 +194,24 @@ void TIM3_IRQHandler(void)
 	}
 
 	DEBUG_PIN = 0;
+}
+
+void TIM2_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+	{
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+
+		global_times++;
+	}
+}
+
+void TIM4_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM4, TIM_IT_Update) == SET)
+	{
+		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+
+		GUI_RefreashInterface(componentsSet, componentsNumber);
+	}
 }

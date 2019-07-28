@@ -51,9 +51,11 @@ static inline void delay(uint32_t ms)
 void Control_SetTargetAngle(double target);
 void Control_SetStatus(ControlStatus_t status);
 
+float Get_TargetAngle(void);
 double Get_CurrentAngle(void);
 
-void TIM2_Init(uint16_t arr, uint16_t psc);
+void TIM2_TimerInit(uint16_t arr, uint16_t psc);
 void TIM3_TimerInit(uint16_t arr, uint16_t psc);
+void TIM4_TimerInit(uint16_t arr, uint16_t psc);
 
 #endif

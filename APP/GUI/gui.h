@@ -9,7 +9,6 @@ typedef struct GUI_Compoment
 {
     uint8_t x;                // x坐标
     uint8_t y;                // y坐标
-    bool isHighlight;         // 是否高亮
     bool currentHighlight;    // 当前高亮状态
     bool needBlink;           // 需要闪烁
     uint8_t *text;            // 文字内容
@@ -20,8 +19,22 @@ typedef struct GUI_Compoment
     // uint16_t flashInterval;   // 闪烁间隔 // 取消，默认值
 } GUI_Component_t;
 
+extern GUI_Component_t *componentsSet[];
+extern uint16_t componentsNumber;
 
-void GUI_RefreashTask(GUI_Component_t *components[]);
+extern GUI_Component_t Text_Angle,
+    AngleValue,
+    Text_Target,
+    TargetValue,
+    StabilizedText,
+    StabilizedValue,
+    TimeText,
+    TimeValuep;
+
+void GUI_SetFlash(GUI_Component_t *component, bool status);
+void OLED_FlashComponent(GUI_Component_t *components);
+void OLED_RefreashComponent(GUI_Component_t *components);
+void GUI_RefreashInterface(GUI_Component_t *components[], uint16_t compomentNumber);
 void OLED_GUI(void);
 
 #endif // _GUI_H_

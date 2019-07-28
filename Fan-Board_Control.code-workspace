@@ -20,7 +20,8 @@
             "math.h": "c",
             "iic2.h": "c",
             "font.h": "c",
-            "oled.h": "c"
+            "oled.h": "c",
+            "gui.h": "c"
         }
     }
 }
