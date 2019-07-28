@@ -6,6 +6,12 @@
 // 计算出的PID值
 extern float PID_value;
 
+// 从串口设定PID参数
+void Set_PIDParamFromUSART(void);
+
+// 调整PID参数值
+void PID_SetParam(float p, float i, float d);
+
 // 根据当前误差计算
 void Calculate_pid(float inputError);
 // 清空PID数据

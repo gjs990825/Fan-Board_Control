@@ -16,7 +16,11 @@
             "mpu6050.h": "c",
             "led.h": "c",
             "timer.h": "c",
-            "pid.h": "c"
+            "pid.h": "c",
+            "math.h": "c",
+            "iic2.h": "c",
+            "font.h": "c",
+            "oled.h": "c"
         }
     }
 }

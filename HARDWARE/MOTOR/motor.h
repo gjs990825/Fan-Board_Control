@@ -4,8 +4,8 @@
 #include "sys.h"
 #include "usart.h"
 
-#define MAX_SPEED 600
-#define MIN_SPEED 150
+#define MAX_SPEED 700
+#define MIN_SPEED 200
 
 #define Set_LMotor(val) TIM_SetCompare4(TIM1, val)
 #define Set_RMotor(val) TIM_SetCompare1(TIM1, val)

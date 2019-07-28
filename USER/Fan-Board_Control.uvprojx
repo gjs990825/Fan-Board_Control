@@ -338,7 +338,7 @@
               <MiscControls>--no_multibyte_chars</MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\CMSIS\CORE;..\CMSIS\STM32F10x_StdPeriph_Driver\inc;..\SYSTEM\sys;..\SYSTEM\delay;..\SYSTEM\usart;..\HARDWARE\LED;..\HARDWARE\MOTOR;..\APP\my_lib;..\HARDWARE\MPU6050;..\HARDWARE\IIC;..\APP\PID;..\HARDWARE\TIMER</IncludePath>
+              <IncludePath>..\USER;..\CMSIS\CORE;..\CMSIS\STM32F10x_StdPeriph_Driver\inc;..\SYSTEM\sys;..\SYSTEM\delay;..\SYSTEM\usart;..\HARDWARE\LED;..\HARDWARE\MOTOR;..\APP\my_lib;..\HARDWARE\MPU6050;..\HARDWARE\IIC;..\APP\PID;..\HARDWARE\TIMER;..\HARDWARE\KEY;..\HARDWARE\OLED;..\APP\GUI</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -390,6 +390,26 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>APP</GroupName>
+          <Files>
+            <File>
+              <FileName>my_lib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\my_lib\my_lib.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\PID\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\GUI\gui.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
@@ -417,20 +437,15 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\TIMER\timer.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>APP</GroupName>
-          <Files>
             <File>
-              <FileName>my_lib.c</FileName>
+              <FileName>key.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\APP\my_lib\my_lib.c</FilePath>
+              <FilePath>..\HARDWARE\KEY\key.c</FilePath>
             </File>
             <File>
-              <FileName>pid.c</FileName>
+              <FileName>oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\APP\PID\pid.c</FilePath>
+              <FilePath>..\HARDWARE\OLED\oled.c</FilePath>
             </File>
           </Files>
         </Group>

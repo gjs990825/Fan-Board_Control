@@ -1,6 +1,7 @@
 #include "mpu6050.h"
 #include "iic.h"
 #include <math.h>
+#include "my_lib.h"
 
 // MPU6050, 硬件I2c地址 0x68，模拟i2c地址0xD0   AD0高电平时地址为0x69 模拟IIC地址0xD2
 #define MPU6050_ADDRESS 0xD0 // 0x69
@@ -182,7 +183,34 @@ void MPU6050_Single_Read(void)
 	MPU6050_Buffer[13] = I2C_Single_Read(MPU6050_ADDRESS, GYRO_ZOUT_L);
 }
 
+#define TrueVal_0 0.0f
+#define TrueVal_45 40.6f
+#define TrueVal_70 67.5f
+#define TrueVal_90 90.0f
+#define TrueVal_110 111.8f
+#define TrueVal_135 139.5f
+#define TrueVal_180 180.0f
+
+float Remap(float input)
+{
+	if (input < TrueVal_45)
+		return map(input, TrueVal_0, TrueVal_45, 0, 45);
+	else if (input < TrueVal_70)
+		return map(input, TrueVal_45, TrueVal_70, 45, 70);
+	else if (input < TrueVal_90)
+		return map(input, TrueVal_70, TrueVal_90, 70, 90);
+	else if (input < TrueVal_110)
+		return map(input, TrueVal_90, TrueVal_110, 90, 110);
+	else if (input < TrueVal_135)
+		return map(input, TrueVal_110, TrueVal_135, 110, 135);
+	else if (input < TrueVal_180)
+		return map(input, TrueVal_135, TrueVal_180, 135, 180);
+	else
+		return 0;
+}
+
 double MPU6050_GetAngle(void)
 {
-	return -atan2((MPU6050_Get_Data(ACCEL_XOUT_H)), (MPU6050_Get_Data(ACCEL_ZOUT_H))) * RAD_TO_DEG + 90.0 + angleCorretionValue;
+	float angle = -atan2((MPU6050_Get_Data(ACCEL_XOUT_H)), (MPU6050_Get_Data(ACCEL_ZOUT_H))) * RAD_TO_DEG + 90.0 + angleCorretionValue;
+	return Remap(angle);
 }

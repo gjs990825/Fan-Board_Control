@@ -5,53 +5,56 @@
 #include "my_lib.h"
 #include <stdlib.h>
 
+// æ¯«ç§’æ—¶é—´æˆ³
+volatile uint32_t global_times = 0;
+
 #define Stabilized_Variance 0.5f
 #define Stabilized_AverageError 3.0f
 
-// Ä¿±ê½Ç¶ÈÖµ
+// ç›®æ ‡è§’åº¦å€¼
 double targetAngle = 90.0;
 
-// µ±Ç°½Ç¶ÈÖµ
+// å½“å‰è§’åº¦å€¼
 double currentAngle = 0;
 
-// µ±ÏÈÔËĞĞ×´Ì¬
+// å½“å…ˆè¿è¡ŒçŠ¶æ€
 ControlStatus_t controlStatus = Status_Stop;
 
-// ×î½üÊ®´Î²ÉÑùµÄ½Ç¶ÈÖµ
+// æœ€è¿‘åæ¬¡é‡‡æ ·çš„è§’åº¦å€¼
 double recentTenAngle[10];
 
-// »ñÈ¡·½²îÖµ
+// è·å–æ–¹å·®å€¼
 float Get_AngleVariance(void)
 {
 	return Variance(recentTenAngle, 10);
 }
 
-// »ñÈ¡Æ½¾ùÎó²îÖµ
+// è·å–å¹³å‡è¯¯å·®å€¼
 float Get_AngleAverageError(void)
 {
 	return targetAngle - Average(recentTenAngle, 10);
 }
 
-// ÊÇ·ñÒÑ¾­ÎÈ¶¨
+// æ˜¯å¦å·²ç»ç¨³å®š
 bool Is_Stablilized(void)
 {
 	return (Get_AngleVariance() < Stabilized_Variance) &&
 		   (abs(Get_AngleAverageError()) < Stabilized_AverageError);
 }
 
-// Éè¶¨Ä¿±ê½Ç¶È
+// è®¾å®šç›®æ ‡è§’åº¦
 void Control_SetTargetAngle(double target)
 {
 	targetAngle = target;
 }
 
-// Éè¶¨ÔËĞĞ×´Ì¬
+// è®¾å®šè¿è¡ŒçŠ¶æ€
 void Control_SetStatus(ControlStatus_t status)
 {
 	controlStatus = status;
 }
 
-// »ñÈ¡µ±Ç°½Ç¶È
+// è·å–å½“å‰è§’åº¦
 double Get_CurrentAngle(void)
 {
 	return currentAngle;
@@ -82,15 +85,50 @@ void TIM3_TimerInit(uint16_t arr, uint16_t psc)
 	TIM_Cmd(TIM3, ENABLE);
 }
 
-#define DEBUG_PIN LED0
+void TIM2_Init(uint16_t arr, uint16_t psc)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+	NVIC_InitTypeDef NVIC_InitSturcture;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+	TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInitStructure.TIM_Period = arr;
+	TIM_TimeBaseInitStructure.TIM_Prescaler = psc;
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStructure);
+
+	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+
+	NVIC_InitSturcture.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitSturcture.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_InitSturcture.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitSturcture.NVIC_IRQChannelSubPriority = 2;
+	NVIC_Init(&NVIC_InitSturcture);
+
+	TIM_Cmd(TIM2, ENABLE);
+}
+
+void TIM2_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
+	{
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+
+		global_times++;
+	}
+}
 
 #define cycleTimes 2
-uint8_t intCounter = 0;
 #define maxArrayNum 10
-uint8_t currentArrayNum = 0;
 
+// è®°å½•æ•°æ®
 static inline void recoderHandle(void)
 {
+	static uint8_t intCounter = 0;
+	static uint8_t currentArrayNum = 0;
+
 	intCounter++;
 	if (intCounter >= cycleTimes)
 	{
@@ -100,11 +138,11 @@ static inline void recoderHandle(void)
 		currentArrayNum++;
 
 		if (currentArrayNum == maxArrayNum)
-		{
 			currentArrayNum = 0;
-		}
 	}
 }
+
+#define DEBUG_PIN LED0
 
 void TIM3_IRQHandler(void)
 {
@@ -112,17 +150,17 @@ void TIM3_IRQHandler(void)
 
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
 	{
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update); //Çå³ı±êÖ¾Î»
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update); //æ¸…é™¤æ ‡å¿—ä½
+
+		currentAngle = MPU6050_GetAngle();
+		recoderHandle();
 
 		switch (controlStatus)
 		{
 		case Status_Run:
 
-			currentAngle = MPU6050_GetAngle();
 			Calculate_pid(targetAngle - currentAngle);
 			Motor_SpeedControl(PID_value);
-
-			recoderHandle();
 
 			break;
 
