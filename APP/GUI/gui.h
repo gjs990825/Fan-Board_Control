@@ -26,15 +26,18 @@ extern GUI_Component_t Text_Angle,
     AngleValue,
     Text_Target,
     TargetValue,
+    Target2Value,
     StabilizedText,
     StabilizedValue,
     TimeText,
-    TimeValuep;
+    TimeValue;
 
 void GUI_SetFlash(GUI_Component_t *component, bool status);
-void OLED_FlashComponent(GUI_Component_t *components);
-void OLED_RefreashComponent(GUI_Component_t *components);
+void GUI_FlashComponent(GUI_Component_t *components);
+void GUI_RefreashComponent(GUI_Component_t *components);
 void GUI_RefreashInterface(GUI_Component_t *components[], uint16_t compomentNumber);
 void OLED_GUI(void);
+
+uint8_t GUI_ConfirmPage(void);
 
 #endif // _GUI_H_

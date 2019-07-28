@@ -3,6 +3,7 @@
 
 #include "sys.h"
 #include "pid.h"
+#include "gui.h"
 
 typedef enum
 {
@@ -47,6 +48,10 @@ static inline void delay(uint32_t ms)
             break;
     }
 }
+
+extern float setAngle1, setAngle2;
+
+void GUI_ChangeDisplay(GUI_Component_t *comp[], uint16_t compNum);
 
 void Control_SetTargetAngle(double target);
 void Control_SetStatus(ControlStatus_t status);

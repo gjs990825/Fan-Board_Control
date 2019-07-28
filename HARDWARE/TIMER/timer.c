@@ -5,12 +5,18 @@
 #include "my_lib.h"
 #include <stdlib.h>
 #include "gui.h"
+#include "oled.h"
 
 // 毫秒时间戳
 volatile uint32_t global_times = 0;
 
 #define Stabilized_Variance 0.5f
 #define Stabilized_AverageError 3.0f
+
+// 角度设定1
+float setAngle1 = 90.0;
+// 角度设定2
+float setAngle2 = 90.0;
 
 // 目标角度值
 double targetAngle = 90.0;
@@ -170,7 +176,7 @@ static inline void recoderHandle(void)
 
 void TIM3_IRQHandler(void)
 {
-	DEBUG_PIN = 1;
+	// DEBUG_PIN = 1;
 
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
 	{
@@ -193,7 +199,7 @@ void TIM3_IRQHandler(void)
 		}
 	}
 
-	DEBUG_PIN = 0;
+	// DEBUG_PIN = 0;
 }
 
 void TIM2_IRQHandler(void)
@@ -206,12 +212,24 @@ void TIM2_IRQHandler(void)
 	}
 }
 
+GUI_Component_t **componentsSeTPointer = NULL;
+uint16_t componentsNumberRec = 0;
+
+// 显示任务控制
+void GUI_ChangeDisplay(GUI_Component_t *comp[], uint16_t compNum)
+{
+	OLED_CLS();
+
+	componentsSeTPointer = comp;
+	componentsNumberRec = compNum;
+}
+
 void TIM4_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM4, TIM_IT_Update) == SET)
 	{
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 
-		GUI_RefreashInterface(componentsSet, componentsNumber);
+		GUI_RefreashInterface(componentsSeTPointer, componentsNumberRec);
 	}
 }

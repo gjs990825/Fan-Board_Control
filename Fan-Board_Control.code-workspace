@@ -21,7 +21,8 @@
             "iic2.h": "c",
             "font.h": "c",
             "oled.h": "c",
-            "gui.h": "c"
+            "gui.h": "c",
+            "key.h": "c"
         }
     }
 }

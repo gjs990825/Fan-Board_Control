@@ -12,7 +12,13 @@
 #include "key.h"
 #include "gui.h"
 #include "oled.h"
+#include "my_lib.h"
+#include "stdlib.h"
 
+uint8_t mission1Start = false;
+uint8_t mission2Start = false;
+
+// 到某一个角度
 void Turn_To(int target)
 {
     LightAndBeep(5);
@@ -27,62 +33,43 @@ void Turn_To(int target)
     LightAndBeep(5);
 }
 
+// 在两个角度之间摆动
+void Swing_Between(int a, int b, uint8_t times)
+{
+    for (uint8_t i = 0; i < times; i++)
+    {
+        Control_SetTargetAngle(b);
+        while (abs(Get_AngleAverageError()) > 1)
+            ;
+        Control_SetTargetAngle(a);
+        while (abs(Get_AngleAverageError()) > 1)
+            ;
+    }
+    Control_SetTargetAngle(a);
+}
+
 void Key_Handle(uint8_t key)
 {
-
     if (key == 5)
     {
-        float setTargetAngle = Get_TargetAngle();
-        int8_t quitOption = 0;
+        GUI_SetFlash(&TargetValue, true);
+        Key_GetSetValue(&setAngle1);
+        GUI_SetFlash(&TargetValue, false);
+        setAngle1 = constrain_float(setAngle1, 45, 145);
 
-        Control_SetStatus(Status_Stop);
-        TargetValue.needBlink = true;
+        GUI_SetFlash(&Target2Value, true);
+        Key_GetSetValue(&setAngle2);
+        GUI_SetFlash(&Target2Value, false);
+        setAngle2 = constrain_float(setAngle2, 45, 145);
 
-        while (1)
+        if (setAngle1 > setAngle2)
         {
-            key = KEY_Scan(1);
-
-            switch (key)
-            {
-            case 2:
-                Control_SetTargetAngle(Get_TargetAngle() - 0.1);
-                break;
-            case 3:
-                Control_SetTargetAngle(Get_TargetAngle() + 0.1);
-                break;
-
-            case 1:
-                quitOption = -1;
-                break;
-            case 4:
-                quitOption = -1;
-                break;
-            case 5:
-                quitOption = 1;
-                break;
-
-            default:
-                break;
-            }
-
-            if (quitOption)
-                break;
+            setAngle2 = setAngle1 = (setAngle1 + setAngle2) / 2;
         }
 
-        while (key == KEY_Scan(1));
-
-        if (quitOption == 1)
-        {
-            // 四舍五入
-            Control_SetTargetAngle((int)(Get_TargetAngle() + 0.5));
-            Control_SetStatus(Status_Run);
-        }
-        else
-        {
-            Control_SetTargetAngle(setTargetAngle);
-        }
-
-        TargetValue.needBlink = false;
+        key = GUI_ConfirmPage();
+        mission1Start = (key == 5) ? true : false;
+        printf("start?:%d\r\n", mission1Start);
     }
 }
 
@@ -104,6 +91,7 @@ int main(void)
     MPU6050_Init();
     OLED_Init();
     OLED_CLS();
+    GUI_ChangeDisplay(componentsSet, componentsNumber);
 
     TIM1_PWMInit(999, 0);      // 分度1000 PWM
     TIM3_TimerInit(719, 1999); // 20ms PID控制
@@ -115,16 +103,10 @@ int main(void)
 
     // while (1)
     // {
-    //     // for (int16_t i = 45; i <= 135; i += 30)
-    //     // {
-    //     //     Turn_To(135);
-    //     //     Turn_To(35);
-    //     //     Turn_To(90);
-    //     // }
-
-    //     Turn_To(135);
-    //     Turn_To(35);
-    //     Turn_To(90);
+    //     Control_SetStatus(Status_Run);
+    //     Swing_Between(60, 110, 2);
+    //     while (1)
+    //         ;
     // }
 
     while (1)
@@ -151,6 +133,22 @@ int main(void)
                    Get_AngleVariance(),
                    Is_Stablilized());
         }
+
+        if (mission1Start)
+        {
+            mission1Start = false;
+
+            Control_SetStatus(Status_Run);
+
+            Turn_To(setAngle1);
+            Turn_To(setAngle2);
+
+            Swing_Between(setAngle2, setAngle1, 3);
+
+            Turn_To(145);
+
+            Control_SetStatus(Status_Stop);
+        }
     }
 
     // while (1)
@@ -173,26 +171,6 @@ int main(void)
 
     //     delay_ms(100);
     // }
-
-    // bool dir = 0;
-    // int current = 0;
-
-    // while (1)
-    // {
-    //     if (dir)
-    //         current++;
-    //     else
-    //         current--;
-
-    //     if (current < -MAX_SPEED || current > MAX_SPEED)
-    //         dir = !dir;
-
-    //     Motor_SpeedControl(current);
-    //     delay_ms(10);
-
-    //     // printf("%d\r\n", current);
-    // }
-    // return 0;
 }
 
 void assert_failed(uint8_t *file, uint32_t line)

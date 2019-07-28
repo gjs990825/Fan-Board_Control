@@ -54,3 +54,49 @@ uint8_t KEY_Scan(uint8_t mode)
 	}
 	return 0; // 无按键按下
 }
+
+// 获取数值并取整
+void Key_GetSetValue(float *val)
+{
+	uint8_t key;
+	int8_t quitOption = 0;
+	float initVal = *val;
+
+	while (1)
+	{
+		key = KEY_Scan(1);
+
+		switch (key)
+		{
+		case 2:
+			*val -= 0.1;
+			break;
+		case 3:
+			*val += 0.1;
+			break;
+		case 1:
+			quitOption = -1;
+			break;
+		case 4:
+			quitOption = -1;
+			break;
+		case 5:
+			quitOption = 1;
+			break;
+
+		default:
+			break;
+		}
+
+		if (quitOption)
+			break;
+	}
+
+	while (key == KEY_Scan(1))
+		;
+
+	if (quitOption != 1)
+		*val = (int)(initVal + 0.5);
+	else
+		*val = (int)(*val + 0.5);
+}
